@@ -9,6 +9,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
 var botClient = new TelegramBotClient("<Your bot token>");
+var usersUnderTest = new Dictionary<long, int>();
 
 using var cts = new CancellationTokenSource();
 
@@ -39,6 +40,10 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
     if (update.Type != UpdateType.Message)
         return;
 
+    var user = update.Message.From;
+    var userId = user!.Id;
+    var chatId = update.Message.Chat.Id;
+
     // ChatMembersAdded messages
     if (update.Message!.Type == MessageType.ChatMembersAdded)
     {
@@ -49,11 +54,32 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
     if (update.Message!.Type != MessageType.Text)
         return;
 
-    // Send a message to the user
-    await botClient.SendTextMessageAsync(
-        chatId: update.Message.Chat.Id,
-        text: $"{update.Message.From.FirstName}, You said: {update.Message.Text}",
-        cancellationToken: cancellationToken);
+    if (usersUnderTest.ContainsKey(userId))
+    {
+        // User sent the correct answer
+        if (usersUnderTest[userId] == Convert.ToInt32(update.Message.Text))
+        {
+            usersUnderTest.Remove(userId);
+
+            // Send a test message to the user
+            await botClient.SendTextMessageAsync(
+                chatId: chatId,
+                text: $"Correct answer!",
+                cancellationToken: cancellationToken);
+        }
+        else
+        {
+            usersUnderTest.Remove(userId);
+             
+            // Send a test message to the user
+            await botClient.SendTextMessageAsync(
+                chatId: chatId,
+                text: $"Wrong answer!",
+                cancellationToken: cancellationToken);
+
+            // TODO: send a message to the user with link to kicked out group
+        }
+    }
 }
 
 async void OnMemberAdded(User user, long chatId, CancellationToken cancellationToken)
@@ -65,7 +91,9 @@ async void OnMemberAdded(User user, long chatId, CancellationToken cancellationT
         chatId: chatId,
         text: $"Welcome: {user.FirstName}! \n" +
               $"Please solve this: 2+3 \n",
-        cancellationToken: cancellationToken) ;
+        cancellationToken: cancellationToken);
+
+    usersUnderTest.Add(user.Id, 5);
 }
 
 Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
