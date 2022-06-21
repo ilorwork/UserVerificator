@@ -74,15 +74,15 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
         }
         else
         {
+            await botClient.BanChatMemberAsync(chatId, userId);
             usersUnderTest.Remove(userId);
 
+            // TODO: send a message to the user with link to kicked out group
             // Send a test message to the user
             await botClient.SendTextMessageAsync(
                 chatId: chatId,
                 text: $"Wrong answer!",
                 cancellationToken: cancellationToken);
-
-            // TODO: send a message to the user with link to kicked out group
         }
     }
 }
