@@ -40,9 +40,14 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
     if (update.Type != UpdateType.Message)
         return;
 
+    Console.WriteLine($"Message type: {update.Message!.Type}");
+
     var user = update.Message.From;
     var userId = user!.Id;
     var chatId = update.Message.Chat.Id;
+    var messageText = update.Message.Text;
+
+    Console.WriteLine($"Received a message: '{messageText}' id: {update.Message.MessageId} from: {userId} in chat {chatId}.");
 
     // ChatMembersAdded messages
     if (update.Message!.Type == MessageType.ChatMembersAdded)
@@ -57,7 +62,7 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
     if (usersUnderTest.ContainsKey(userId))
     {
         // User sent the correct answer
-        if (usersUnderTest[userId] == Convert.ToInt32(update.Message.Text))
+        if (usersUnderTest[userId] == Convert.ToInt32(messageText))
         {
             usersUnderTest.Remove(userId);
 
