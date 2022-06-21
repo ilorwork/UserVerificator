@@ -65,11 +65,11 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
         if (usersUnderTest[userId] == Convert.ToInt32(messageText))
         {
             usersUnderTest.Remove(userId);
-
-            // Send a test message to the user
+            // Send a "Well done" message to the user
             await botClient.SendTextMessageAsync(
                 chatId: chatId,
-                text: $"Correct answer!",
+                text: $"Well done {user.FirstName}! \n" +
+                      "You've passed the verification process!",
                 cancellationToken: cancellationToken);
         }
         else
@@ -78,10 +78,11 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
             usersUnderTest.Remove(userId);
 
             // TODO: send a message to the user with link to kicked out group
-            // Send a test message to the user
+            // Send a "kicked out" message to the group
             await botClient.SendTextMessageAsync(
                 chatId: chatId,
-                text: $"Wrong answer!",
+                text: $"{user.FirstName} has being kicked out, \n" +
+                      "because he/it sent the wrong answer!",
                 cancellationToken: cancellationToken);
         }
     }
