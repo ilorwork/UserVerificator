@@ -70,7 +70,7 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
         else
         {
             usersUnderTest.Remove(userId);
-             
+
             // Send a test message to the user
             await botClient.SendTextMessageAsync(
                 chatId: chatId,
@@ -85,15 +85,21 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
 async void OnMemberAdded(User user, long chatId, CancellationToken cancellationToken)
 {
     Console.WriteLine($"User: '{user.FirstName}' id: {user.Id}, added!!!");
+    var rand = new Random();
+    var a = rand.Next(2, 11);
+    var b = rand.Next(2, 21);
 
     // Send a test message to the user
     await botClient.SendTextMessageAsync(
         chatId: chatId,
         text: $"Welcome: {user.FirstName}! \n" +
-              $"Please solve this: 2+3 \n",
+              $"Please solve this: {a}+{b} \n" +
+              "Please note! \n" +
+              "If you send the wrong answer you will get kicked out of this group!",
         cancellationToken: cancellationToken);
 
-    usersUnderTest.Add(user.Id, 5);
+    var result = a + b;
+    usersUnderTest.Add(user.Id, result);
 }
 
 Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
