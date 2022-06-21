@@ -9,7 +9,6 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
 var botClient = new TelegramBotClient("<Your bot token>");
-var usersUnderTest = new Dictionary<long, int>();
 
 using var cts = new CancellationTokenSource();
 
@@ -40,6 +39,12 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
     if (update.Type != UpdateType.Message)
         return;
 
+    // ChatMembersAdded messages
+    if (update.Message!.Type == MessageType.ChatMembersAdded)
+    {
+        OnMemberAdded(update.Message.From, update.Message.Chat.Id, cancellationToken);
+    }
+
     // Only process text messages
     if (update.Message!.Type != MessageType.Text)
         return;
@@ -49,6 +54,18 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
         chatId: update.Message.Chat.Id,
         text: $"{update.Message.From.FirstName}, You said: {update.Message.Text}",
         cancellationToken: cancellationToken);
+}
+
+async void OnMemberAdded(User user, long chatId, CancellationToken cancellationToken)
+{
+    Console.WriteLine($"User: '{user.FirstName}' id: {user.Id}, added!!!");
+
+    // Send a test message to the user
+    await botClient.SendTextMessageAsync(
+        chatId: chatId,
+        text: $"Welcome: {user.FirstName}! \n" +
+              $"Please solve this: 2+3 \n",
+        cancellationToken: cancellationToken) ;
 }
 
 Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
