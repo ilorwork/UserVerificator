@@ -40,24 +40,27 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
     if (update.Type != UpdateType.Message)
         return;
 
-    Console.WriteLine($"Message type: {update.Message!.Type}");
-
+    var messageType = update.Message!.Type;
     var user = update.Message.From;
     var userId = user!.Id;
+    var userFirstName = user.FirstName;
     var chatId = update.Message.Chat.Id;
-    var messageText = update.Message.Text;
-
-    Console.WriteLine($"Received a message: '{messageText}' id: {update.Message.MessageId} from: {userId} in chat {chatId}.");
+    
+    Console.WriteLine($"Message type: {messageType}");
 
     // ChatMembersAdded messages
-    if (update.Message!.Type == MessageType.ChatMembersAdded)
+    if (messageType == MessageType.ChatMembersAdded)
     {
-        OnMemberAdded(update.Message.From, update.Message.Chat.Id, cancellationToken);
+        OnMemberAdded(user, chatId, cancellationToken);
     }
 
     // Only process text messages
-    if (update.Message!.Type != MessageType.Text)
+    if (messageType != MessageType.Text)
         return;
+
+    var messageText = update.Message.Text;
+
+    Console.WriteLine($"Received a message: '{messageText}' id: {update.Message.MessageId} from: {userId} in chat {chatId}.");
 
     if (usersUnderTest.ContainsKey(userId))
     {
@@ -68,7 +71,7 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
             // Send a "Well done" message to the user
             await botClient.SendTextMessageAsync(
                 chatId: chatId,
-                text: $"Well done {user.FirstName}! \n" +
+                text: $"Well done {userFirstName}! \n" +
                       "You've passed the verification process!",
                 cancellationToken: cancellationToken);
         }
@@ -81,7 +84,7 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
             // Send a "kicked out" message to the group
             await botClient.SendTextMessageAsync(
                 chatId: chatId,
-                text: $"{user.FirstName} has being kicked out, \n" +
+                text: $"{userFirstName} has being kicked out, \n" +
                       "because he/it sent the wrong answer!",
                 cancellationToken: cancellationToken);
         }
@@ -90,7 +93,10 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
 
 async void OnMemberAdded(User user, long chatId, CancellationToken cancellationToken)
 {
-    Console.WriteLine($"User: '{user.FirstName}' id: {user.Id}, added!!!");
+    var userId = user!.Id;
+    var userFirstName = user.FirstName;
+
+    Console.WriteLine($"User: '{userFirstName}' id: {userId}, added!!!");
     var rand = new Random();
     var a = rand.Next(2, 11);
     var b = rand.Next(2, 21);
@@ -98,14 +104,14 @@ async void OnMemberAdded(User user, long chatId, CancellationToken cancellationT
     // Send a test message to the user
     await botClient.SendTextMessageAsync(
         chatId: chatId,
-        text: $"Welcome: {user.FirstName}! \n" +
+        text: $"Welcome: {userFirstName}! \n" +
               $"Please solve this: {a}+{b} \n" +
               "Please note! \n" +
               "If you send the wrong answer you will get kicked out of this group!",
         cancellationToken: cancellationToken);
 
     var result = a + b;
-    usersUnderTest.Add(user.Id, result);
+    usersUnderTest.Add(userId, result);
 }
 
 Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
