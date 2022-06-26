@@ -51,6 +51,16 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
     // ChatMembersAdded messages
     if (messageType == MessageType.ChatMembersAdded)
     {
+        var chatAdminsTask = botClient.GetChatAdministratorsAsync(chatId);
+        var chatAdmins = chatAdminsTask.Result;
+
+        foreach (var chatAdmin in chatAdmins)
+        {
+            // In case the user is an admin or user added by admin
+            if (chatAdmin.User.Id.Equals(user.Id))
+                return;
+        }
+        
         OnMemberAdded(user, chatId, cancellationToken);
     }
 
