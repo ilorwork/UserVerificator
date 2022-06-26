@@ -48,6 +48,14 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
 
     Console.WriteLine($"Message type: {messageType}");
 
+    // ChatMemberLeft messages
+    if (messageType == MessageType.ChatMemberLeft)
+    {
+        // In case the user is leaving before answering
+        if (usersUnderTest.ContainsKey(userId))
+            usersUnderTest.Remove(userId);
+    }
+
     // ChatMembersAdded messages
     if (messageType == MessageType.ChatMembersAdded)
     {
@@ -60,7 +68,7 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
             if (chatAdmin.User.Id.Equals(user.Id))
                 return;
         }
-        
+
         OnMemberAdded(user, chatId, cancellationToken);
     }
 
