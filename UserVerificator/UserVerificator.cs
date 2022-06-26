@@ -45,7 +45,7 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
     var userId = user!.Id;
     var userFirstName = user.FirstName;
     var chatId = update.Message.Chat.Id;
-    
+
     Console.WriteLine($"Message type: {messageType}");
 
     // ChatMembersAdded messages
@@ -64,8 +64,20 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
 
     if (usersUnderTest.ContainsKey(userId))
     {
+        int messageTextAsInt;
+        try
+        {
+            messageTextAsInt = Convert.ToInt32(messageText);
+        }
+        catch (Exception ex) when (ex is FormatException || ex is OverflowException)
+        {
+            messageTextAsInt = -1;
+        }
+
+        Console.WriteLine($"Test result: {usersUnderTest[userId]}, The user's answer: {messageTextAsInt}");
+
         // User sent the correct answer
-        if (usersUnderTest[userId] == Convert.ToInt32(messageText))
+        if (usersUnderTest[userId] == messageTextAsInt)
         {
             usersUnderTest.Remove(userId);
             // Send a "Well done" message to the user
