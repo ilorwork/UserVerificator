@@ -41,7 +41,9 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
         return;
 
     var messageType = update.Message!.Type;
+    // In case of user adding another user "user" and "newChatusers[0]" would be different
     var user = update.Message.From;
+    var newChatUsers = update.Message.NewChatMembers;
     var userId = user!.Id;
     var userFirstName = user.FirstName;
     var chatId = update.Message.Chat.Id;
@@ -68,8 +70,10 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
             if (chatAdmin.User.Id.Equals(user.Id))
                 return;
         }
-
-        OnMemberAdded(user, chatId, cancellationToken);
+        foreach (var newChatUser in newChatUsers)
+        {
+            OnMemberAdded(newChatUser, chatId, cancellationToken);
+        }
     }
 
     // Only process text messages
