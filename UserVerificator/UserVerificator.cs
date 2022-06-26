@@ -126,6 +126,10 @@ async void OnMemberAdded(User user, long chatId, CancellationToken cancellationT
     var userId = user!.Id;
     var userFirstName = user.FirstName;
 
+    // In any case that the user is already in the dictionary (for example when this bot is kicked and added again)
+    if (usersUnderTest.ContainsKey(userId))
+        usersUnderTest.Remove(userId);
+
     Console.WriteLine($"User: '{userFirstName}' id: {userId}, added!!!");
     var rand = new Random();
     var a = rand.Next(2, 11);
