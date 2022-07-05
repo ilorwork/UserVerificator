@@ -42,7 +42,7 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
 
     var messageType = update.Message!.Type;
     // In case of user adding another user "user" and "newChatusers[0]" would be different
-    var user = update.Message.From;
+    var user = update.Message.From; 
     var newChatUsers = update.Message.NewChatMembers;
     var userId = user!.Id;
     var userFirstName = user.FirstName;
@@ -82,7 +82,7 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
 
     var messageText = update.Message.Text;
 
-    Console.WriteLine($"Received a message: '{messageText}' id: {update.Message.MessageId} from: {userId} in chat {chatId}.");
+    Console.WriteLine($"Received a message: '{messageText}' id: {update.Message.MessageId} from: {userFirstName} id: {userId} in chat {chatId}.");
 
     if (usersUnderTest.ContainsKey(userId))
     {
