@@ -161,16 +161,13 @@ async void Log(string logMessage)
 
     try
     {
-        var chatIdAsInt = Convert.ToInt32(logChatId);
-        if (logChatId == "0" || chatIdAsInt == 0)
+        var chatIdAsInt = Convert.ToInt64(logChatId);
+        if (chatIdAsInt == 0)
             return;
     }
     catch (FormatException)
     {
         return;
-    }
-    catch (OverflowException)
-    {
     }
 
     // Send a test message to the user
