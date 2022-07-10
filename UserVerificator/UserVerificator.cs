@@ -7,10 +7,16 @@ using Telegram.Bot.Exceptions;
 using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using UserVerificator;
 
-var botClient = new TelegramBotClient("<Your bot token>");
-// Chat id which you want the logs to be sent to(Optional) 
-var logChatId = "<Your 'log-chat' id>";
+var config = Configuration.LoadConfiguration();
+
+// Your bot's token - load from userVerificatorConfig.json
+var botClient = new TelegramBotClient(config.botToken);
+
+// Chat id which you want the logs to be sent to(Optional) - load from userVerificatorConfig.json
+var logChatId = config.logChatId;
+
 var usersUnderTest = new Dictionary<long, int>();
 
 using var cts = new CancellationTokenSource();
