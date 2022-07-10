@@ -44,7 +44,7 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
 
     var messageType = update.Message!.Type;
     // In case of user adding another user "user" and "newChatusers[0]" would be different
-    var user = update.Message.From; 
+    var user = update.Message.From;
     var newChatUsers = update.Message.NewChatMembers;
     var userId = user!.Id;
     var userFirstName = user.FirstName;
@@ -104,6 +104,7 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
         if (usersUnderTest[userId] == messageTextAsInt)
         {
             usersUnderTest.Remove(userId);
+
             // Send a "Well done" message to the user
             await botClient.SendTextMessageAsync(
                 chatId: chatId,
@@ -113,7 +114,7 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
         }
         else
         {
-            await botClient.BanChatMemberAsync(chatId, userId);
+            await botClient.BanChatMemberAsync(chatId, userId, cancellationToken: cancellationToken);
             usersUnderTest.Remove(userId);
 
             // TODO: send a message to the user with link to kicked out group
