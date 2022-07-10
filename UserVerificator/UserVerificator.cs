@@ -9,6 +9,8 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
 var botClient = new TelegramBotClient("<Your bot token>");
+// Chat id which you want the logs to be sent to(Optional) 
+var logChatId = "<Your 'log-chat' id>";
 var usersUnderTest = new Dictionary<long, int>();
 
 using var cts = new CancellationTokenSource();
@@ -28,7 +30,7 @@ botClient.StartReceiving(
 
 var me = await botClient.GetMeAsync();
 
-Console.WriteLine($"Start listening for @{me.Username}");
+Log($"Start listening for @{me.Username}");
 Console.ReadLine();
 
 // Send cancellation request to stop bot
@@ -48,7 +50,7 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
     var userFirstName = user.FirstName;
     var chatId = update.Message.Chat.Id;
 
-    Console.WriteLine($"Message type: {messageType}");
+    Log($"Message type: {messageType}");
 
     // ChatMemberLeft messages
     if (messageType == MessageType.ChatMemberLeft)
@@ -82,7 +84,7 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
 
     var messageText = update.Message.Text;
 
-    Console.WriteLine($"Received a message: '{messageText}' id: {update.Message.MessageId} from: {userId} in chat {chatId}.");
+    Log($"Received a message: '{messageText}' id: {update.Message.MessageId} from: {userFirstName} id: {userId} in chat {chatId}.");
 
     if (usersUnderTest.ContainsKey(userId))
     {
@@ -96,12 +98,13 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
             messageTextAsInt = -1;
         }
 
-        Console.WriteLine($"Test result: {usersUnderTest[userId]}, The user's answer: {messageTextAsInt}");
+        Log($"Test result: {usersUnderTest[userId]}, The user's answer: {messageTextAsInt}");
 
         // User sent the correct answer
         if (usersUnderTest[userId] == messageTextAsInt)
         {
             usersUnderTest.Remove(userId);
+
             // Send a "Well done" message to the user
             await botClient.SendTextMessageAsync(
                 chatId: chatId,
@@ -111,7 +114,7 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
         }
         else
         {
-            await botClient.BanChatMemberAsync(chatId, userId);
+            await botClient.BanChatMemberAsync(chatId, userId, cancellationToken: cancellationToken);
             usersUnderTest.Remove(userId);
 
             // TODO: send a message to the user with link to kicked out group
@@ -134,7 +137,7 @@ async void OnMemberAdded(User user, long chatId, CancellationToken cancellationT
     if (usersUnderTest.ContainsKey(userId))
         usersUnderTest.Remove(userId);
 
-    Console.WriteLine($"User: '{userFirstName}' id: {userId}, added!!!");
+    Log($"User: '{userFirstName}' id: {userId}, added!!!");
     var rand = new Random();
     var a = rand.Next(2, 11);
     var b = rand.Next(2, 21);
@@ -152,6 +155,27 @@ async void OnMemberAdded(User user, long chatId, CancellationToken cancellationT
     usersUnderTest.Add(userId, result);
 }
 
+async void Log(string logMessage)
+{
+    Console.WriteLine(logMessage);
+
+    try
+    {
+        var chatIdAsInt = Convert.ToInt64(logChatId);
+        if (chatIdAsInt == 0)
+            return;
+    }
+    catch (FormatException)
+    {
+        return;
+    }
+
+    // Send a test message to the user
+    await botClient.SendTextMessageAsync(
+        chatId: logChatId,
+        text: logMessage);
+}
+
 Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
 {
     var errorMessage = exception switch
@@ -161,6 +185,6 @@ Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, 
         _ => exception.ToString()
     };
 
-    Console.WriteLine(errorMessage);
+    Log(errorMessage);
     return Task.CompletedTask;
 }
