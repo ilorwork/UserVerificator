@@ -78,8 +78,18 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
             if (chatAdmin.User.Id.Equals(user.Id))
                 return;
         }
+
         foreach (var newChatUser in newChatUsers)
         {
+            var msgDate = update.Message.Date;
+            var maxMinutesDiff = 5;
+            if (DateTime.UtcNow.Subtract(msgDate).TotalMinutes > maxMinutesDiff)
+            {
+                Log($"Skipping user test. reason: \n" +
+                    $"There was more than {maxMinutesDiff} minutes delay since the user: '{newChatUser.FirstName}' joined the group.");
+                continue;
+            }
+
             OnMemberAdded(newChatUser, chatId, cancellationToken);
         }
     }
