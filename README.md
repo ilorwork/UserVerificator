@@ -1,5 +1,5 @@
-# User Verificator Bot
-UserVerificator is a Telegram bot (made by @ilor64) that meant to test if a new group users are real users or bots.
+# User Verificator ⛔🤖
+A Telegram bot (made by @ilor64) that meant to test if a new group users are real users or bots.
 
 ## Main technologies
 ### language
@@ -15,7 +15,14 @@ UserVerificator is a Telegram bot (made by @ilor64) that meant to test if a new 
 * Download an IDE of your choice. Probably Visual Studio, or VS Code.
 
 ### Execution
-* In TelegramBotClient init, replace the string <Your bot token> with your own Telegram Bot Token.
+* Create a json file in the solution folder with the following tamplate:
+```
+{
+  "botToken": "<Your bot's token>",
+  "logChatId": "<Chat id which you want the logs to be sent to>"
+}
+```
+
 * Execute the program using ```dotnet run``` command.
   
 ## Contributions
