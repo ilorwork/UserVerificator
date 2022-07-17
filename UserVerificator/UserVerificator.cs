@@ -82,7 +82,7 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
         foreach (var newChatUser in newChatUsers)
         {
             var msgDate = update.Message.Date;
-            var maxMinutesDiff = 5;
+            var maxMinutesDiff = Convert.ToInt32(config.serverDelay);
             if (DateTime.UtcNow.Subtract(msgDate).TotalMinutes > maxMinutesDiff)
             {
                 Log($"Skipping user test. reason: \n" +

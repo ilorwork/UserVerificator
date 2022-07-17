@@ -8,6 +8,10 @@ namespace UserVerificator
         public string botToken;
         public string logChatId;
 
+        // The Max Allowed delay from the moment user join the group - to the moment this server catch that "user join" message.
+        // Default value is "5" (in Minutes).
+        public string serverDelay = "5";
+
         public static Configuration LoadConfiguration()
         {
             using (StreamReader r = new StreamReader("userVerificatorConfig.json"))
