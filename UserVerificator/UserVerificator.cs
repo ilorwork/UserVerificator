@@ -9,6 +9,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using UserVerificator;
 
+// PR test
 var config = Configuration.LoadConfiguration();
 
 var botClient = new TelegramBotClient(config.botToken);
