@@ -1,5 +1,5 @@
 # User Verificator ⛔🤖
-A Telegram bot (made by @ilor64) that meant to test if a new group users are real users or bots.
+A Telegram bot (made by @ilor64) that tests if a new group users are real users or bots.
 
 ## Main technologies
 ### language
