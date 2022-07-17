@@ -11,10 +11,7 @@ using UserVerificator;
 
 var config = Configuration.LoadConfiguration();
 
-// Your bot's token - load from userVerificatorConfig.json
 var botClient = new TelegramBotClient(config.botToken);
-
-// Chat id which you want the logs to be sent to(Optional) - load from userVerificatorConfig.json
 var logChatId = config.logChatId;
 
 var usersUnderTest = new Dictionary<long, int>();
