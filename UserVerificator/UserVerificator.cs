@@ -11,10 +11,7 @@ using UserVerificator;
 
 var config = Configuration.LoadConfiguration();
 
-// Your bot's token - load from userVerificatorConfig.json
 var botClient = new TelegramBotClient(config.botToken);
-
-// Chat id which you want the logs to be sent to(Optional) - load from userVerificatorConfig.json
 var logChatId = config.logChatId;
 
 var usersUnderTest = new Dictionary<long, int>();
@@ -82,7 +79,7 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
         foreach (var newChatUser in newChatUsers)
         {
             var msgDate = update.Message.Date;
-            var maxMinutesDiff = 5;
+            var maxMinutesDiff = Convert.ToInt32(config.serverDelay);
             if (DateTime.UtcNow.Subtract(msgDate).TotalMinutes > maxMinutesDiff)
             {
                 Log($"Skipping user test. reason: \n" +
