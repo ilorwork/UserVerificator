@@ -148,11 +148,18 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
                 cancellationToken: cancellationToken);
 
             AddMessageToDelete(userId, message);
+            UnbanUserAsync(chatId, userId);
         }
 
         DeleteMessages(userId);
         CheckCleanUpMessagesList();
     }
+}
+
+async void UnbanUserAsync(long chatId, long userId)
+{
+    if(config.unbanAfterKick)
+        await botClient.UnbanChatSenderChatAsync(chatId, userId);
 }
 
 void CheckCleanUpMessagesList()

@@ -11,6 +11,8 @@ namespace UserVerificator
         // Chat id which you want the logs to be sent to(Optional) - load from userVerificatorConfig.json
         public string logChatId;
 
+        public bool unbanAfterKick = false;
+
         // The Max Allowed delay from the moment user join the group - to the moment this server catch that "user join" message.
         // Default value is "5" (in Minutes).
         public string serverDelay = "5";
