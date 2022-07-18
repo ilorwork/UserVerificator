@@ -15,6 +15,10 @@ namespace UserVerificator
         // Default value is "5" (in Minutes).
         public string serverDelay = "5";
 
+        // The max minutes to wait before cleaning up the messagesToDelete list.
+        // Default value is "1" (in hours).
+        public string messageDeletionTimeOut = "1";
+
         public static Configuration LoadConfiguration()
         {
             using (StreamReader r = new StreamReader("userVerificatorConfig.json"))
