@@ -13,8 +13,10 @@ var config = Configuration.LoadConfiguration();
 
 var botClient = new TelegramBotClient(config.botToken);
 var logChatId = config.logChatId;
+var messageDeletionTimeOut = Convert.ToInt32(config.messageDeletionTimeOut);
 
 var usersUnderTest = new Dictionary<long, int>();
+var messagesToDelete = new List<MessageToDelete>();
 
 using var cts = new CancellationTokenSource();
 
@@ -60,7 +62,11 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
     {
         // In case the user is leaving before answering
         if (usersUnderTest.ContainsKey(userId))
+        {
+            Log($"user: {userFirstName} has left the group before sending an answer");
             usersUnderTest.Remove(userId);
+            DeleteMessages(userId);
+        }
     }
 
     // ChatMembersAdded messages
@@ -112,6 +118,7 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
         }
 
         Log($"Test result: {usersUnderTest[userId]}, The user's answer: {messageTextAsInt}");
+        AddMessageToDelete(userId, update.Message);
 
         // User sent the correct answer
         if (usersUnderTest[userId] == messageTextAsInt)
@@ -119,11 +126,13 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
             usersUnderTest.Remove(userId);
 
             // Send a "Well done" message to the user
-            await botClient.SendTextMessageAsync(
+            var message = await botClient.SendTextMessageAsync(
                 chatId: chatId,
                 text: $"Well done {userFirstName}! \n" +
                       "You've passed the verification process!",
                 cancellationToken: cancellationToken);
+
+            AddMessageToDelete(userId, message);
         }
         else
         {
@@ -132,13 +141,51 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
 
             // TODO: send a message to the user with link to kicked out group
             // Send a "kicked out" message to the group
-            await botClient.SendTextMessageAsync(
+            var message = await botClient.SendTextMessageAsync(
                 chatId: chatId,
                 text: $"{userFirstName} has being kicked out, \n" +
                       "because he/it sent the wrong answer!",
                 cancellationToken: cancellationToken);
+
+            AddMessageToDelete(userId, message);
+            UnbanUserAsync(chatId, userId);
+        }
+
+        DeleteMessages(userId);
+        CheckCleanUpMessagesList();
+    }
+}
+
+async void UnbanUserAsync(long chatId, long userId)
+{
+    if(config.unbanAfterKick)
+        await botClient.UnbanChatSenderChatAsync(chatId, userId);
+}
+
+void CheckCleanUpMessagesList()
+{
+    messagesToDelete.RemoveAll(msg => DateTime.UtcNow.Subtract(msg.message.Date).TotalHours > messageDeletionTimeOut);
+}
+
+void AddMessageToDelete(long userId, Message message)
+{
+    var messageByChatId = new MessageToDelete(userId, message);
+    messagesToDelete.Add(messageByChatId);
+}
+
+void DeleteMessages(long userId)
+{
+    var helpList = new List<MessageToDelete>(messagesToDelete);
+
+    foreach (var msgToDelete in messagesToDelete)
+    {
+        if (userId.Equals(msgToDelete.userId))
+        { 
+            botClient.DeleteMessageAsync(msgToDelete.message.Chat.Id, msgToDelete.message.MessageId);
+            helpList.Remove(msgToDelete);
         }
     }
+    messagesToDelete = new List<MessageToDelete>(helpList);
 }
 
 async void OnMemberAdded(User user, long chatId, CancellationToken cancellationToken)
@@ -156,13 +203,15 @@ async void OnMemberAdded(User user, long chatId, CancellationToken cancellationT
     var b = rand.Next(2, 21);
 
     // Send a test message to the user
-    await botClient.SendTextMessageAsync(
+    var message = await botClient.SendTextMessageAsync(
         chatId: chatId,
         text: $"Welcome: {userFirstName}! \n" +
               $"Please solve this: {a}+{b} \n" +
               "Please note! \n" +
               "If you send the wrong answer you will get kicked out of this group!",
         cancellationToken: cancellationToken);
+
+    AddMessageToDelete(userId, message);
 
     var result = a + b;
     usersUnderTest.Add(userId, result);
@@ -200,4 +249,17 @@ Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, 
 
     Log(errorMessage);
     return Task.CompletedTask;
+}
+
+class MessageToDelete
+{
+    // The user that the message refers to
+    public long userId;
+    public Message message;
+
+    public MessageToDelete(long userId, Message message)
+    {
+        this.userId = userId;
+        this.message = message;
+    }
 }
