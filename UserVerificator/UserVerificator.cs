@@ -23,7 +23,8 @@ using var cts = new CancellationTokenSource();
 // StartReceiving does not block the caller thread. Receiving is done on the ThreadPool.
 var receiverOptions = new ReceiverOptions
 {
-    AllowedUpdates = Array.Empty<UpdateType>() // receive all update types
+    AllowedUpdates = Array.Empty<UpdateType>(), // receive all update types
+    ThrowPendingUpdates = true
 };
 
 botClient.StartReceiving(
