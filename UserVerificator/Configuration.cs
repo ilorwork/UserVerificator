@@ -18,6 +18,7 @@ namespace UserVerificator
         public string serverDelay = "5";
 
         // The max minutes to wait before cleaning up the messagesToDelete list.
+        // Relevant for unfinished sessions only! (checked on end of any session)
         // Default value is "1" (in hours).
         public string messageDeletionTimeOut = "1";
 
