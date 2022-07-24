@@ -24,7 +24,7 @@ using var cts = new CancellationTokenSource();
 var receiverOptions = new ReceiverOptions
 {
     AllowedUpdates = Array.Empty<UpdateType>(), // receive all update types
-    ThrowPendingUpdates = true
+    ThrowPendingUpdates = true // Throw out all pending updates on start
 };
 
 botClient.StartReceiving(
